@@ -1,41 +1,65 @@
 import PhotosApiService from './photos'
+import axios from 'axios';
+
 
 const refs = {
     searchForm: document.querySelector('#search-form'),
     loadMoreBtn: document.querySelector('.load-more'),
-    gallery: document.querySelector('.gallery')
+    gallery: document.querySelector('.gallery'),
+    searchBtn: document.querySelector('.serchBtn-js'),
+    serchValue: document.querySelector('.searh-value-js')
 }
 const photosApiService = new PhotosApiService();
 
-refs.loadMoreBtn.style.opacity = '0';
+let photosQuntity = 0;
 
+refs.searchBtn.disabled = true;
+refs.loadMoreBtn.style.opacity = '0';
+refs.serchValue.addEventListener('input', activeInput)
 refs.searchForm.addEventListener('submit', onSearch);
-refs.loadMoreBtn.addEventListener('click', loadMore)
+refs.loadMoreBtn.addEventListener('click', loadMore);
 
 function loadMore() {
     photosApiService.fetchArticles()
         .then(photos => {
-            refs.gallery.insertAdjacentHTML('beforeend', markupList(photos)) 
+            refs.gallery.insertAdjacentHTML('beforeend', markupList(photos));
+            photosQuntity += photos.length;
+            // console.log('more', photosQuntity);
         });
 }
 
 function onSearch(e) {
     e.preventDefault();
     clearGallery();
-    photosApiService.query = e.currentTarget.searchQuery.value;
-    if (photosApiService.query === '') {
-        return
-    }
+    photosApiService.query = e.currentTarget.searchQuery.value.trim();
     photosApiService.resetPage();
     photosApiService.fetchArticles()
         .then(photos => {
             refs.gallery.insertAdjacentHTML('beforeend', markupList(photos))
+            photosQuntity += photos.length;
+            // console.log(photosQuntity);
+            if (photos.length < 40) {
+                refs.loadMoreBtn.style.opacity = '0';
+            }     
+            else {
+                refs.loadMoreBtn.style.opacity = '1';
+            }
         });
-    refs.loadMoreBtn.style.opacity = '1';
 }
 
 function clearGallery() {
     refs.gallery.innerHTML = '';
+}
+
+function activeInput(e) {
+    let langthValue = '';
+    langthValue = e.currentTarget.value;
+    // console.log(langthValue.length);
+    if (langthValue.length > 0) {
+        refs.searchBtn.disabled = false;
+    } else {
+        refs.searchBtn.disabled = true;
+    }
 }
 
 function markupList(photos) {
