@@ -31,7 +31,13 @@ function loadMore() {
 function onSearch(e) {
     e.preventDefault();
     clearGallery();
-    photosApiService.query = e.currentTarget.searchQuery.value.trim();
+    const searchValue = e.currentTarget.searchQuery.value.trim();
+    const lengthSearchValue = searchValue.length;
+    photosApiService.query = searchValue.trim();
+    if (photosApiService.query.length === 0) {
+        return
+    }
+    console.log(photosApiService.query.length);
     photosApiService.resetPage();
     photosApiService.fetchArticles()
         .then(photos => {
